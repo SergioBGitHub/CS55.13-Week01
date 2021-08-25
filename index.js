@@ -12,22 +12,49 @@ let myserver = myhttp.createServer(
   // createServer() uses our function to run when a request comes in
   function (myrequest, myresponse) {
     console.log(myrequest.url);
-    console.log(url.parse(myrequest.url).pathname);
+    let my_path = myurl.parse(myrequest.url).pathname;
+    console.log(my_path);
 
-    let mytext;
-    if (myrequest.url === "/hey") {
-      mytext = "Well hello there...";
+    if(my_path !== '/') {
+
+      let full_path = mypath.join(process.cwd(), my_path);
+      myfilesys.exists(full_path, function(exists) {
+        if(!exists) {
+
+          myresponse.writeHead(404, {"Content-Type": "text/plain"});
+          myresponse.write("404 Not Found\n");
+          myresponse.end();
+
+        } else {
+
+          myfilesys.readFile(full_path, "binary", function(err, file) {
+            if(err) {
+
+              myresponse.writeHead(500, {"Content-Type": "text/plain"});
+              myresponse.write(err + "\n");
+              myresponse.end();
+
+            } else {
+
+              myresponse.writeHead(200);
+              myresponse.write(file, "binary");
+              myresponse.end();
+
+            }
+          });
+        }
+
+      });
+
     } else {
-      mytext = "I don't know you!";
-    }
-
-    mytext = mytext + " - Please help me... I am trapped in a Node.js server!";
 
     // writeHead() creates an http response header, including the status code (200 OK), the content type
-    myresponse.writeHead(200, { "Content-Type": "text/plain" });
+    myresponse.writeHead(200, {"Content-Type": "text/plain"});
+    myresponse.write("Welcome!\n");
 
     // end() returns some data and closes the response (sends it)
-    myresponse.end(mytext + "\n");
+    myresponse.end();
+    }
   } // function
 );
 
